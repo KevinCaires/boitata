@@ -14,14 +14,20 @@ namespace Boitata.Tools{
             string? _user = Console.ReadLine();
             Console.Write("password: ");
             string? _password = Auth.PwdReader();
+            Console.Write("\nrepeat password: ");
+            string? _check_pass = Auth.PwdReader();
 
-            if(_user is null || string.IsNullOrEmpty(_password)){
+            if(_user is null || string.IsNullOrEmpty(_password) || string.IsNullOrEmpty(_check_pass)){
                 Console.WriteLine("Invalid content!");
                 return;
             }
             else if(!Auth.PwdIsSecure(_password)){
                 Console.WriteLine("Waek password is detected!");
                 Console.WriteLine("Need six caracters with one upper, one number and one symbol!");
+                return;
+            }
+            else if(_password != _check_pass){
+                Console.WriteLine("Password do not match!");
                 return;
             }
 
