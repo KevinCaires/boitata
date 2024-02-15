@@ -28,20 +28,25 @@ namespace Boitata.Models{
         }
 
         public async Task<bool> SingIn(string? user, string? password){
-            await using FileStream readStream = File.OpenRead($"{user}.json");
-            var content = await JsonSerializer.DeserializeAsync<Login>(readStream);
+            try{
+                await using FileStream readStream = File.OpenRead($"{user}.json");
+                var content = await JsonSerializer.DeserializeAsync<Login>(readStream);
 
-            if(content is null){
+                if(content is null){
+                    return false;
+                }
+                else if(! await Auth.PwdCheck(password, content.password)){
+                    return false;
+                }
+
+                this.user = content.user;
+                this.password = content.password;
+
+                return true;
+            }
+            catch (FileNotFoundException){
                 return false;
             }
-            else if(! await Auth.PwdCheck(password, content.password)){
-                return false;
-            }
-
-            this.user = content.user;
-            this.password = content.password;
-
-            return true;
         }
     }
 }

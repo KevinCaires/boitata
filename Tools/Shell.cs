@@ -13,9 +13,9 @@ namespace Boitata.Tools{
             Console.Write("username: ");
             string? _user = Console.ReadLine();
             Console.Write("password: ");
-            string? _password = Console.ReadLine();
+            string? _password = Auth.PwdReader();
 
-            if(_user is null || _password is null){
+            if(_user is null || string.IsNullOrEmpty(_password)){
                 Console.WriteLine("Invalid content!");
                 return;
             }
@@ -36,16 +36,16 @@ namespace Boitata.Tools{
             Console.Write("user: ");
             string? user = Console.ReadLine();
             Console.Write("password: ");
-            string? password = Console.ReadLine();
+            string? password = Auth.PwdReader();
 
             Login login = new Login(user, password);
             
             if(! await login.SingIn(user, password)){
-                Console.WriteLine("Invalid user or password!");
+                Console.WriteLine("\nInvalid user or password!");
                 return;
             }
 
-            Console.WriteLine("Logged in.");
+            Console.WriteLine("\nLogged in.");
             this._login = login;
             this._key = password;
             return;

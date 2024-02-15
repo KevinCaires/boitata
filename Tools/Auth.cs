@@ -34,5 +34,22 @@ namespace Boitata.Tools.AuthUtils{
             bool isEqual = SHA256.Equals(await Auth.PwdHash(password), hash);
             return isEqual;
         }
+
+        public static string PwdReader(){
+            string _password = string.Empty;
+            ConsoleKey _key;
+
+            do{
+                var keyInfo = Console.ReadKey(intercept: true);
+                _key = keyInfo.Key;
+
+                if(!char.IsControl(keyInfo.KeyChar)){
+                    Console.Write("*");
+                    _password += keyInfo.KeyChar;
+                }
+            } while(_key != ConsoleKey.Enter);
+
+            return _password;
+        }
     }
 }
