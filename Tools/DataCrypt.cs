@@ -11,6 +11,14 @@ namespace Boitata.Tools.DataCrypt{
                return; 
             }
 
+            var _content = await EncryptDecrypt.Decrypt(key);
+
+            if(_content is not null){
+                foreach(var item in _content){
+                    data.Add(item);
+                }
+            }
+
             string _data = JsonSerializer.Serialize(data);
 
             try{
