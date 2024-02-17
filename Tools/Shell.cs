@@ -5,12 +5,12 @@ using Boitata.Tools.DataCrypt;
 
 namespace Boitata.Tools{
     public class Shell{
-        protected Login? _login = null;
-        protected string? _key = null;
+        private Login? _login = null;
+        private string? _key = null;
 
-        private async Task Init(){
+        public async Task Init(){
             Console.WriteLine("Init user context.");
-            Console.Write("username: ");
+            Console.Write("user: ");
             string? _user = Console.ReadLine();
             Console.Write("password: ");
             string? _password = Auth.PwdReader();
@@ -38,7 +38,7 @@ namespace Boitata.Tools{
             this._key = _password;
         }
 
-        private async Task SingIn(){
+        public async Task SingIn(){
             Console.Write("user: ");
             string? user = Console.ReadLine();
             Console.Write("password: ");
@@ -57,35 +57,13 @@ namespace Boitata.Tools{
             return;
         }
 
-        private async Task Set(){
-            if(this._login is null){
-                Console.WriteLine("You not logged!");
-                return;
-            }
-            Console.Write("URL: ");
-            string? url = Console.ReadLine();
-            Console.Write("User: ");
-            string? user = Console.ReadLine();
-            Console.Write("Password: ");
-            string? password = Console.ReadLine();
-
-            if(string.IsNullOrEmpty(user) || string.IsNullOrEmpty(password)){
-                Console.WriteLine("Invalid content!");
-                return;
-            }
-
-            List<Data> data = new List<Data>();
-            data.Add(new Data(url, user, password));
-            await EncryptDecrypt.Encrypt(data, this._key);
-        }
-
         public async Task Get(){
-            if(this._login is null){
+            if(this._login is null || string.IsNullOrEmpty(this._key)){
                 Console.WriteLine("You not logged!");
                 return;
             }
 
-            List<Data>? data = await EncryptDecrypt.Decrypt(this._key);
+            List<Data>? data = await Data.Get(this._key);
 
             if(data is null){
                 Console.WriteLine("No content!");
@@ -93,45 +71,83 @@ namespace Boitata.Tools{
             }
 
             foreach(Data _data in data){
-                Console.Write(@$"
-                URL: {_data.url}
-                User: {_data.username}
-                Password: {_data.password}
-                ");
+                Console.WriteLine();
+                Console.WriteLine($"ID: {_data.url}");
+                Console.WriteLine($"User: {_data.username}");
+                Console.WriteLine($"Password: {_data.password}");
             }
         }
 
-        public async Task Run(){
-            bool shell = true;
-
-            while(shell){
-                Console.Write("\n>> ");
-                string? command = Console.ReadLine();
-
-                if(command is null){
-                    continue;
-                }
-
-                switch(command){
-                    case "init":
-                        await this.Init();
-                        break;
-                    case "login":
-                        await this.SingIn();
-                        break;
-                    case "get":
-                    await this.Get();
-                        break;
-                    case "set":
-                        await this.Set();
-                        break;
-                    case "exit":
-                        shell = false;
-                        break;
-                    default:
-                        break;
-                }
+        public async Task Set(){
+            if(this._login is null || string.IsNullOrEmpty(this._key)){
+                Console.WriteLine("You not logged!");
+                return;
             }
+
+            Console.Write("ID/URL: ");
+            string? url = Console.ReadLine();
+            Console.Write("User: ");
+            string? user = Console.ReadLine();
+            Console.Write("Password: ");
+            string? password = Console.ReadLine();
+
+            if(string.IsNullOrEmpty(url)
+                || string.IsNullOrEmpty(user)
+                || string.IsNullOrEmpty(password)){
+
+                Console.WriteLine("Invalid content!");
+                return;
+            }
+
+            bool _response = await Data.Set(this._key, new Data(url, user, password));
+
+            if(!_response)  Console.WriteLine("Can't set data!");
+            else Console.WriteLine("OK!");
+        }
+
+        public async Task Put(){
+            if(this._login is null || string.IsNullOrEmpty(this._key)){
+                Console.WriteLine("You not logged!");
+                return;
+            }
+
+            List<Data>? _list = await Data.Get(this._key);
+            
+            if(_list is null) return;
+
+            Console.Write("ID? ");
+            string? _id = Console.ReadLine();
+
+            if(string.IsNullOrEmpty(_id)) return;
+            
+            Data? _data = Data.Search(_id, _list);
+
+            if(_data is null){
+                Console.WriteLine("Not found!");
+                return;
+            }
+
+            while(true){
+                Console.Write($"Change ID [ {_data.url} ], sure? (y/n): ");
+                var _key = Console.ReadKey(intercept: true);
+                Console.WriteLine();
+                if(_key.Key.Equals(ConsoleKey.N)) return;
+                else if(_key.Key.Equals(ConsoleKey.Y)) break;
+                else Console.WriteLine("Invalid option ...");
+            }
+
+            Console.Write("user: ");
+            string? _user = Console.ReadLine();
+            Console.Write("password: ");
+            string? _password = Console.ReadLine();
+
+            if(string.IsNullOrEmpty(_user) || string.IsNullOrEmpty(_password)) return;
+
+            _data.username = _user;
+            _data.password = _password;
+    
+            if(! await Data.Put(this._key, _data)) Console.WriteLine("Can not update data!");
+            else Console.WriteLine("Done!");
         }
     }
 }

@@ -11,7 +11,7 @@ namespace Boitata.Tools.DataCrypt{
                return; 
             }
 
-            var _content = await EncryptDecrypt.Decrypt(key);
+            var _content = await Decrypt(key);
 
             if(_content is not null){
                 foreach(var item in _content){

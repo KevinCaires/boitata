@@ -42,11 +42,15 @@ namespace Boitata.Tools.AuthUtils{
             do{
                 var keyInfo = Console.ReadKey(intercept: true);
                 _key = keyInfo.Key;
-
-                if(!char.IsControl(keyInfo.KeyChar)){
+                
+                if(keyInfo.Key.Equals(ConsoleKey.Backspace) && _password.Length > 0){
+                    Console.Write("\b \b");
+                    _password = _password[0..^1];
+                } else if(!char.IsControl(keyInfo.KeyChar)){
                     Console.Write("*");
                     _password += keyInfo.KeyChar;
                 }
+
             } while(_key != ConsoleKey.Enter);
 
             return _password;
